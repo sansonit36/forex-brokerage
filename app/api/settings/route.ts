@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSettings, updateSettings } from '@/lib/remote-db';
+import { getSettings, updateSettings } from '@/lib/kv-db';
 
 export async function GET() {
   try {

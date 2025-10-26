@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAdminByEmail, createAdmin } from '@/lib/remote-db';
+import { getAdminByEmail, createAdmin } from '@/lib/kv-db';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAdmins, deleteAllAdmins } from '@/lib/remote-db';
+import { getAdmins, deleteAllAdmins } from '@/lib/kv-db';
 
 export async function GET() {
   try {
