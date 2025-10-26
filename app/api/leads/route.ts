@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createLead, getLeads, updateLead, deleteLead, getSettings } from '@/lib/db';
+import { createLead, getLeads, updateLead, deleteLead, getSettings } from '@/lib/postgres-db';
 import { trackLeadSubmission } from '@/lib/facebook-pixel';
 import { z } from 'zod';
 
@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 
     let leads = [];
     try {
-      leads = getLeads();
+      leads = await getLeads();
     } catch (error) {
       console.log('Could not read leads file (expected on Vercel)');
       // Return empty array if file doesn't exist
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
       let facebookAccessToken = '';
       
       try {
-        const settings = getSettings();
+        const settings = await getSettings();
         facebookPixelId = settings.facebookPixelId;
         facebookAccessToken = settings.facebookAccessToken;
       } catch (settingsError) {

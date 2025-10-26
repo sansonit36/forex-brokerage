@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAdminByEmail, createAdmin } from '@/lib/db';
+import { getAdminByEmail, createAdmin } from '@/lib/postgres-db';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       // Login
       let admin;
       try {
-        admin = getAdminByEmail(email);
+        admin = await getAdminByEmail(email);
       } catch (error) {
         // If file doesn't exist on Vercel, return error
         return NextResponse.json({ error: 'No admin accounts exist. Database not configured.' }, { status: 401 });
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
       // Try to create admin
       let admin;
       try {
-        admin = createAdmin({
+        admin = await createAdmin({
           email,
           password: hashedPassword,
           name: body.name || 'Admin',
