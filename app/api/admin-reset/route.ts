@@ -1,24 +1,23 @@
 import { NextResponse } from 'next/server';
-import { db } from '@vercel/postgres';
+import { createPool } from '@vercel/postgres';
 import { getAdminByEmail, createAdmin } from '@/lib/postgres-db';
 import bcrypt from 'bcryptjs';
 
 export async function GET() {
   try {
-    // Use pooled connection via db.sql
-    const client = await db.connect();
-    const result = await client.sql`SELECT email, name, created_at FROM admins ORDER BY created_at DESC LIMIT 5`;
-    client.release();
+    // Create a pool connection which uses POSTGRES_URL automatically
+    const pool = createPool();
+    const { rows } = await pool.sql`SELECT email, name, created_at FROM admins ORDER BY created_at DESC LIMIT 5`;
     
     return NextResponse.json({ 
       success: true,
-      adminCount: result.rows.length,
-      admins: result.rows.map(admin => ({
+      adminCount: rows.length,
+      admins: rows.map(admin => ({
         email: admin.email,
         name: admin.name,
         createdAt: admin.created_at
       })),
-      message: result.rows.length > 0 ? 'Admin accounts exist. Use /admin/login to sign in.' : 'No admin accounts found.'
+      message: rows.length > 0 ? 'Admin accounts exist. Use /admin/login to sign in.' : 'No admin accounts found.'
     });
   } catch (error) {
     return NextResponse.json({ 
