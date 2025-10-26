@@ -31,7 +31,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const leads = getLeads();
+    let leads = [];
+    try {
+      leads = getLeads();
+    } catch (error) {
+      console.log('Could not read leads file (expected on Vercel)');
+      // Return empty array if file doesn't exist
+      return NextResponse.json({ leads: [], total: 0, message: 'No leads stored (database not configured)' });
+    }
     
     // Filter by status if provided
     const status = searchParams.get('status');
@@ -41,7 +48,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ leads: filteredLeads, total: filteredLeads.length });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch leads' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch leads', leads: [], total: 0 }, { status: 500 });
   }
 }
 
@@ -53,36 +60,40 @@ export async function POST(request: Request) {
     // Validate input
     const validatedData = leadSchema.parse(body);
     
-    // Try to create lead (will fail on Vercel due to read-only filesystem)
-    let lead;
-    try {
-      lead = createLead({
-        ...validatedData,
-        status: 'new',
-      });
-    } catch (fsError) {
-      // If file system write fails (Vercel), create lead object without saving
-      console.error('File system write failed (expected on Vercel):', fsError);
-      lead = {
-        id: `lead_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        ...validatedData,
-        status: 'new',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-    }
+    // Create lead object (won't save to file on Vercel, but that's okay)
+    const lead = {
+      id: `lead_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      ...validatedData,
+      status: 'new',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    
+    // Log the lead data (you can view this in Vercel logs)
+    console.log('New lead submission:', JSON.stringify(lead, null, 2));
 
     // Send Facebook Pixel event
     try {
-      const settings = getSettings();
       const headers = request.headers;
       const userAgent = headers.get('user-agent') || 'Unknown';
-      const referer = headers.get('referer') || headers.get('origin') || 'https://yoursite.com';
+      const referer = headers.get('referer') || headers.get('origin') || 'Unknown';
 
-      if (settings.facebookPixelId && settings.facebookAccessToken) {
+      // Try to get settings (might fail on Vercel)
+      let facebookPixelId = '';
+      let facebookAccessToken = '';
+      
+      try {
+        const settings = getSettings();
+        facebookPixelId = settings.facebookPixelId;
+        facebookAccessToken = settings.facebookAccessToken;
+      } catch (settingsError) {
+        console.log('Could not load settings (expected on Vercel)');
+      }
+
+      if (facebookPixelId && facebookAccessToken) {
         await trackLeadSubmission(
-          settings.facebookPixelId,
-          settings.facebookAccessToken,
+          facebookPixelId,
+          facebookAccessToken,
           {
             email: validatedData.email,
             phone: validatedData.phone,
