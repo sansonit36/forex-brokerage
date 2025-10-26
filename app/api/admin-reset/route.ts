@@ -1,22 +1,24 @@
 import { NextResponse } from 'next/server';
+import { db } from '@vercel/postgres';
 import { getAdminByEmail, createAdmin } from '@/lib/postgres-db';
 import bcrypt from 'bcryptjs';
 
 export async function GET() {
   try {
-    // Simple query to test database and show if admin exists
-    const { sql } = await import('@vercel/postgres');
-    const { rows } = await sql`SELECT email, name, created_at FROM admins ORDER BY created_at DESC LIMIT 5`;
+    // Use pooled connection via db.sql
+    const client = await db.connect();
+    const result = await client.sql`SELECT email, name, created_at FROM admins ORDER BY created_at DESC LIMIT 5`;
+    client.release();
     
     return NextResponse.json({ 
       success: true,
-      adminCount: rows.length,
-      admins: rows.map(admin => ({
+      adminCount: result.rows.length,
+      admins: result.rows.map(admin => ({
         email: admin.email,
         name: admin.name,
         createdAt: admin.created_at
       })),
-      message: rows.length > 0 ? 'Admin accounts exist. Use /admin/login to sign in.' : 'No admin accounts found.'
+      message: result.rows.length > 0 ? 'Admin accounts exist. Use /admin/login to sign in.' : 'No admin accounts found.'
     });
   } catch (error) {
     return NextResponse.json({ 
