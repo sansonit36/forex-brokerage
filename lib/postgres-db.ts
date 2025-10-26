@@ -2,6 +2,8 @@ import { sql } from '@vercel/postgres';
 import { Lead, Admin, Settings } from './types';
 import bcrypt from 'bcryptjs';
 
+// Use Vercel's sql client which automatically uses pooled connections
+
 // Initialize database tables
 export async function initializeDatabase() {
   try {

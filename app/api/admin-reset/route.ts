@@ -1,42 +1,65 @@
 import { NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { getAdminByEmail, createAdmin } from '@/lib/postgres-db';
+import bcrypt from 'bcryptjs';
 
 export async function GET() {
   try {
-    // Check if any admins exist
-    const { rows } = await sql`SELECT email, name, created_at FROM admins`;
+    // Try to get admin by a test email to see if database is working
+    const testAdmin = await getAdminByEmail('test@test.com');
     
     return NextResponse.json({ 
       success: true,
-      count: rows.length,
-      admins: rows.map(admin => ({
-        email: admin.email,
-        name: admin.name,
-        createdAt: admin.created_at
-      }))
+      message: 'Database connection working',
+      hasTestAdmin: testAdmin !== null
     });
   } catch (error) {
     return NextResponse.json({ 
       success: false, 
-      error: 'Failed to fetch admins',
+      error: 'Database query failed',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
 
-export async function DELETE() {
+export async function POST(request: Request) {
   try {
-    // Delete all admins (for testing only)
-    await sql`DELETE FROM admins`;
+    const { action, email, password, name } = await request.json();
     
-    return NextResponse.json({ 
-      success: true,
-      message: 'All admins deleted. You can now register a new account.'
-    });
+    if (action === 'create-default') {
+      // Create a default admin account
+      const defaultEmail = email || 'admin@thesoftclose.com';
+      const defaultPassword = password || 'Admin123!';
+      const defaultName = name || 'Admin';
+      
+      const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+      
+      const admin = await createAdmin({
+        email: defaultEmail,
+        password: hashedPassword,
+        name: defaultName,
+        role: 'admin',
+      });
+      
+      return NextResponse.json({ 
+        success: true,
+        message: 'Default admin created',
+        admin: {
+          email: admin.email,
+          name: admin.name
+        },
+        credentials: {
+          email: defaultEmail,
+          password: defaultPassword,
+          note: 'Please change password after first login'
+        }
+      });
+    }
+    
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
     return NextResponse.json({ 
       success: false, 
-      error: 'Failed to delete admins',
+      error: 'Failed to create admin',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
