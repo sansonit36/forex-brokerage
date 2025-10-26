@@ -1,13 +1,9 @@
 import { NextResponse } from 'next/server';
-import { createPool } from '@vercel/postgres';
-import { getAdminByEmail, createAdmin } from '@/lib/postgres-db';
-import bcrypt from 'bcryptjs';
+import { sql } from '@vercel/postgres';
 
 export async function GET() {
   try {
-    // Create a pool connection which uses POSTGRES_URL automatically
-    const pool = createPool();
-    const { rows } = await pool.sql`SELECT email, name, created_at FROM admins ORDER BY created_at DESC LIMIT 5`;
+    const { rows } = await sql`SELECT email, name, created_at FROM admins ORDER BY created_at DESC LIMIT 5`;
     
     return NextResponse.json({ 
       success: true,
@@ -30,9 +26,7 @@ export async function GET() {
 
 export async function DELETE() {
   try {
-    // Delete all admins from database
-    const pool = createPool();
-    await pool.sql`DELETE FROM admins`;
+    await sql`DELETE FROM admins`;
     
     return NextResponse.json({ 
       success: true,
