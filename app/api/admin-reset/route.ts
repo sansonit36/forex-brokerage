@@ -28,45 +28,20 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function DELETE() {
   try {
-    const { action, email, password, name } = await request.json();
+    // Delete all admins from database
+    const pool = createPool();
+    await pool.sql`DELETE FROM admins`;
     
-    if (action === 'create-default') {
-      // Create a default admin account
-      const defaultEmail = email || 'admin@thesoftclose.com';
-      const defaultPassword = password || 'Admin123!';
-      const defaultName = name || 'Admin';
-      
-      const hashedPassword = await bcrypt.hash(defaultPassword, 10);
-      
-      const admin = await createAdmin({
-        email: defaultEmail,
-        password: hashedPassword,
-        name: defaultName,
-        role: 'admin',
-      });
-      
-      return NextResponse.json({ 
-        success: true,
-        message: 'Default admin created',
-        admin: {
-          email: admin.email,
-          name: admin.name
-        },
-        credentials: {
-          email: defaultEmail,
-          password: defaultPassword,
-          note: 'Please change password after first login'
-        }
-      });
-    }
-    
-    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    return NextResponse.json({ 
+      success: true,
+      message: 'All admin accounts deleted. You can now register a new account at /admin/register'
+    });
   } catch (error) {
     return NextResponse.json({ 
       success: false, 
-      error: 'Failed to create admin',
+      error: 'Failed to delete admins',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
