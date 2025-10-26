@@ -50,17 +50,17 @@ export async function POST(request: Request) {
     }
 
     if (action === 'register') {
-      // Register (only for initial setup)
+      // Register - Allow multiple admins
       let existing;
       try {
-        existing = getAdminByEmail(email);
+        existing = await getAdminByEmail(email);
       } catch (error) {
-        // File doesn't exist, that's okay for first registration
+        // Error checking existing admin
         existing = null;
       }
       
       if (existing) {
-        return NextResponse.json({ error: 'Admin already exists' }, { status: 400 });
+        return NextResponse.json({ error: 'An admin with this email already exists' }, { status: 400 });
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
