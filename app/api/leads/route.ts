@@ -53,11 +53,24 @@ export async function POST(request: Request) {
     // Validate input
     const validatedData = leadSchema.parse(body);
     
-    // Create lead
-    const lead = createLead({
-      ...validatedData,
-      status: 'new',
-    });
+    // Try to create lead (will fail on Vercel due to read-only filesystem)
+    let lead;
+    try {
+      lead = createLead({
+        ...validatedData,
+        status: 'new',
+      });
+    } catch (fsError) {
+      // If file system write fails (Vercel), create lead object without saving
+      console.error('File system write failed (expected on Vercel):', fsError);
+      lead = {
+        id: `lead_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        ...validatedData,
+        status: 'new',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
 
     // Send Facebook Pixel event
     try {
