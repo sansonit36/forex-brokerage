@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { createPool } from '@vercel/postgres';
+
+const pool = createPool({
+  connectionString: process.env.POSTGRES_URL
+});
 
 export async function GET() {
   try {
     // Create leads table
-    await sql`
+    await pool.sql`
       CREATE TABLE IF NOT EXISTS leads (
         id TEXT PRIMARY KEY,
         first_name TEXT NOT NULL,
@@ -28,7 +32,7 @@ export async function GET() {
     `;
 
     // Create admins table
-    await sql`
+    await pool.sql`
       CREATE TABLE IF NOT EXISTS admins (
         id TEXT PRIMARY KEY,
         email TEXT UNIQUE NOT NULL,
@@ -40,7 +44,7 @@ export async function GET() {
     `;
 
     // Create settings table
-    await sql`
+    await pool.sql`
       CREATE TABLE IF NOT EXISTS settings (
         id TEXT PRIMARY KEY DEFAULT 'default',
         calendly_link TEXT,
@@ -53,9 +57,9 @@ export async function GET() {
     `;
 
     // Insert default settings if not exists
-    const existingSettings = await sql`SELECT * FROM settings WHERE id = 'default'`;
+    const existingSettings = await pool.sql`SELECT * FROM settings WHERE id = 'default'`;
     if (existingSettings.rows.length === 0) {
-      await sql`
+      await pool.sql`
         INSERT INTO settings (id, whatsapp_number, whatsapp_message)
         VALUES (
           'default',
