@@ -4,13 +4,19 @@ import bcrypt from 'bcryptjs';
 
 export async function GET() {
   try {
-    // Try to get admin by a test email to see if database is working
-    const testAdmin = await getAdminByEmail('test@test.com');
+    // Simple query to test database and show if admin exists
+    const { sql } = await import('@vercel/postgres');
+    const { rows } = await sql`SELECT email, name, created_at FROM admins ORDER BY created_at DESC LIMIT 5`;
     
     return NextResponse.json({ 
       success: true,
-      message: 'Database connection working',
-      hasTestAdmin: testAdmin !== null
+      adminCount: rows.length,
+      admins: rows.map(admin => ({
+        email: admin.email,
+        name: admin.name,
+        createdAt: admin.created_at
+      })),
+      message: rows.length > 0 ? 'Admin accounts exist. Use /admin/login to sign in.' : 'No admin accounts found.'
     });
   } catch (error) {
     return NextResponse.json({ 
