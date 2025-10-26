@@ -3,6 +3,7 @@ import { getAdminByEmail, createAdmin } from '@/lib/kv-db';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
+// Updated: 2025-10-27 05:00 - Fixed admin registration
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 export async function POST(request: Request) {
