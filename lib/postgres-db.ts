@@ -1,8 +1,18 @@
-import { sql } from '@vercel/postgres';
 import { Lead, Admin, Settings } from './types';
 import bcrypt from 'bcryptjs';
 
-// Use Vercel's sql client which automatically uses pooled connections
+// Dynamic import to avoid build-time execution
+function getDb() {
+  const { createPool } = require('@vercel/postgres');
+  if (!process.env.POSTGRES_URL) {
+    throw new Error('POSTGRES_URL environment variable is not set');
+  }
+  return createPool({
+    connectionString: process.env.POSTGRES_URL
+  });
+}
+
+const sql = getDb().sql;
 
 // Initialize database tables
 export async function initializeDatabase() {
@@ -81,7 +91,7 @@ export async function initializeDatabase() {
 export async function getLeads(): Promise<Lead[]> {
   try {
     const { rows } = await sql`SELECT * FROM leads ORDER BY created_at DESC`;
-    return rows.map(row => ({
+    return rows.map((row: any) => ({
       id: row.id,
       firstName: row.first_name,
       lastName: row.last_name,
