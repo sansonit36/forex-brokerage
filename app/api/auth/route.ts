@@ -12,7 +12,13 @@ export async function POST(request: Request) {
 
     if (action === 'login') {
       // Login
-      const admin = getAdminByEmail(email);
+      let admin;
+      try {
+        admin = getAdminByEmail(email);
+      } catch (error) {
+        // If file doesn't exist on Vercel, return error
+        return NextResponse.json({ error: 'No admin accounts exist. Database not configured.' }, { status: 401 });
+      }
       
       if (!admin) {
         return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
@@ -45,7 +51,13 @@ export async function POST(request: Request) {
 
     if (action === 'register') {
       // Register (only for initial setup)
-      const existing = getAdminByEmail(email);
+      let existing;
+      try {
+        existing = getAdminByEmail(email);
+      } catch (error) {
+        // File doesn't exist, that's okay for first registration
+        existing = null;
+      }
       
       if (existing) {
         return NextResponse.json({ error: 'Admin already exists' }, { status: 400 });
@@ -53,12 +65,22 @@ export async function POST(request: Request) {
 
       const hashedPassword = await bcrypt.hash(password, 10);
       
-      const admin = createAdmin({
-        email,
-        password: hashedPassword,
-        name: body.name || 'Admin',
-        role: 'admin',
-      });
+      // Try to create admin
+      let admin;
+      try {
+        admin = createAdmin({
+          email,
+          password: hashedPassword,
+          name: body.name || 'Admin',
+          role: 'admin',
+        });
+      } catch (fsError) {
+        // If file system write fails on Vercel, return error with instructions
+        return NextResponse.json({ 
+          error: 'Cannot create admin account on Vercel. Please set up database (Vercel Postgres) first.',
+          details: 'File system is read-only on Vercel serverless functions.'
+        }, { status: 500 });
+      }
 
       const token = jwt.sign(
         { id: admin.id, email: admin.email, role: admin.role },
@@ -80,6 +102,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
+    console.error('Auth error:', error);
     return NextResponse.json({ error: 'Authentication failed' }, { status: 500 });
   }
 }
