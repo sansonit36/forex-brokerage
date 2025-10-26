@@ -1,24 +1,24 @@
 import { NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { getAdmins, deleteAllAdmins } from '@/lib/remote-db';
 
 export async function GET() {
   try {
-    const { rows } = await sql`SELECT email, name, created_at FROM admins ORDER BY created_at DESC LIMIT 5`;
+    const admins = await getAdmins();
     
     return NextResponse.json({ 
       success: true,
-      adminCount: rows.length,
-      admins: rows.map(admin => ({
+      adminCount: admins.length,
+      admins: admins.map(admin => ({
         email: admin.email,
         name: admin.name,
-        createdAt: admin.created_at
+        createdAt: admin.createdAt
       })),
-      message: rows.length > 0 ? 'Admin accounts exist. Use /admin/login to sign in.' : 'No admin accounts found.'
+      message: admins.length > 0 ? 'Admin accounts exist. Use /admin/login to sign in.' : 'No admin accounts found.'
     });
   } catch (error) {
     return NextResponse.json({ 
       success: false, 
-      error: 'Database query failed',
+      error: 'Failed to fetch admins',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
@@ -26,7 +26,7 @@ export async function GET() {
 
 export async function DELETE() {
   try {
-    await sql`DELETE FROM admins`;
+    await deleteAllAdmins();
     
     return NextResponse.json({ 
       success: true,

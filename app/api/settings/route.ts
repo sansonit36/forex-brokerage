@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { getSettings, updateSettings } from '@/lib/db';
+import { getSettings, updateSettings } from '@/lib/remote-db';
 
 export async function GET() {
   try {
-    const settings = getSettings();
+    const settings = await getSettings();
     return NextResponse.json({ success: true, settings });
   } catch (error) {
     console.error('Settings fetch error:', error);
@@ -15,10 +15,12 @@ export async function PATCH(request: Request) {
   try {
     const body = await request.json();
     
-    const settings = updateSettings({
+    const settings = await updateSettings({
       calendlyLink: body.calendlyLink,
       whatsappNumber: body.whatsappNumber,
       whatsappMessage: body.whatsappMessage,
+      facebookPixelId: body.facebookPixelId,
+      facebookAccessToken: body.facebookAccessToken,
     });
 
     return NextResponse.json({ success: true, settings });
