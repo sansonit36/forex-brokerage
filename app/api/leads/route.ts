@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createLead, getLeads, updateLead, deleteLead, getSettings } from '@/lib/kv-db';
+import { createLead, getLeads, updateLead, deleteLead, getSettings } from '@/lib/supabase-db';
 import { trackLeadSubmission } from '@/lib/facebook-pixel';
 import { z } from 'zod';
 

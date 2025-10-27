@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
-import { Redis } from '@upstash/redis';
+import { getAdmins, createAdmin } from '@/lib/supabase-db';
 import bcrypt from 'bcryptjs';
-
-const redis = Redis.fromEnv();
 
 export async function POST(request: Request) {
   try {
@@ -15,8 +13,8 @@ export async function POST(request: Request) {
     }
 
     // Check if admin exists
-    const admins = await redis.get('admins') || [];
-    const existing = Array.isArray(admins) ? admins.find((a: any) => a.email === email) : null;
+    const admins = await getAdmins();
+    const existing = admins.find(a => a.email === email);
 
     if (existing) {
       return NextResponse.json({ error: 'Admin already exists' }, { status: 400 });
@@ -24,18 +22,12 @@ export async function POST(request: Request) {
 
     // Create admin
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newAdmin = {
-      id: `admin_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    const newAdmin = await createAdmin({
       email,
       password: hashedPassword,
       name: name || 'Admin',
       role: 'admin',
-      createdAt: new Date().toISOString(),
-    };
-
-    // Save to KV
-    const updatedAdmins = Array.isArray(admins) ? [...admins, newAdmin] : [newAdmin];
-    await redis.set('admins', updatedAdmins);
+    });
 
     return NextResponse.json({
       success: true,
