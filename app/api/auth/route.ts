@@ -13,13 +13,7 @@ export async function POST(request: Request) {
 
     if (action === 'login') {
       // Login
-      let admin;
-      try {
-        admin = await getAdminByEmail(email);
-      } catch (error) {
-        // If file doesn't exist on Vercel, return error
-        return NextResponse.json({ error: 'No admin accounts exist. Database not configured.' }, { status: 401 });
-      }
+      const admin = await getAdminByEmail(email);
       
       if (!admin) {
         return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
@@ -66,22 +60,13 @@ export async function POST(request: Request) {
 
       const hashedPassword = await bcrypt.hash(password, 10);
       
-      // Try to create admin
-      let admin;
-      try {
-        admin = await createAdmin({
-          email,
-          password: hashedPassword,
-          name: body.name || 'Admin',
-          role: 'admin',
-        });
-      } catch (fsError) {
-        // If file system write fails on Vercel, return error with instructions
-        return NextResponse.json({ 
-          error: 'Cannot create admin account on Vercel. Please set up database (Vercel Postgres) first.',
-          details: 'File system is read-only on Vercel serverless functions.'
-        }, { status: 500 });
-      }
+      // Create admin
+      const admin = await createAdmin({
+        email,
+        password: hashedPassword,
+        name: body.name || 'Admin',
+        role: 'admin',
+      });
 
       const token = jwt.sign(
         { id: admin.id, email: admin.email, role: admin.role },
