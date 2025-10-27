@@ -15,7 +15,28 @@ export async function getLeads(): Promise<Lead[]> {
       .order('created_at', { ascending: false });
     
     if (error) throw error;
-    return data || [];
+    
+    // Map Supabase data to our Lead type
+    return (data || []).map(row => ({
+      id: row.id,
+      firstName: row.first_name,
+      lastName: row.last_name,
+      email: row.email,
+      phone: row.phone,
+      company: row.company,
+      country: row.country,
+      brokerageType: row.brokerage_type,
+      setupBudget: row.setup_budget,
+      monthlyBudget: row.monthly_budget,
+      timeline: row.timeline,
+      experience: row.experience,
+      currentTraders: row.current_traders,
+      message: row.message,
+      source: row.source,
+      status: row.status,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }));
   } catch (error) {
     console.error('Error fetching leads:', error);
     return [];
@@ -45,8 +66,32 @@ export async function createLead(lead: Omit<Lead, 'id' | 'createdAt' | 'updatedA
     .select()
     .single();
 
-  if (error) throw error;
-  return data;
+  if (error) {
+    console.error('Error creating lead:', error);
+    throw error;
+  }
+  
+  // Map back to Lead type
+  return {
+    id: data.id,
+    firstName: data.first_name,
+    lastName: data.last_name,
+    email: data.email,
+    phone: data.phone,
+    company: data.company,
+    country: data.country,
+    brokerageType: data.brokerage_type,
+    setupBudget: data.setup_budget,
+    monthlyBudget: data.monthly_budget,
+    timeline: data.timeline,
+    experience: data.experience,
+    currentTraders: data.current_traders,
+    message: data.message,
+    source: data.source,
+    status: data.status,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
 }
 
 export async function updateLead(id: string, updates: Partial<Lead>): Promise<Lead | null> {
