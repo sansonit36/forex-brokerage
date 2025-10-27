@@ -60,17 +60,13 @@ export async function POST(request: Request) {
     // Validate input
     const validatedData = leadSchema.parse(body);
     
-    // Create lead object (won't save to file on Vercel, but that's okay)
-    const lead = {
-      id: `lead_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    // Save lead to Supabase database
+    const savedLead = await createLead({
       ...validatedData,
       status: 'new',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    });
     
-    // Log the lead data (you can view this in Vercel logs)
-    console.log('New lead submission:', JSON.stringify(lead, null, 2));
+    console.log('Lead saved to Supabase:', savedLead.id);
 
     // Send Facebook Pixel event
     try {
@@ -114,7 +110,7 @@ export async function POST(request: Request) {
       console.error('Facebook Pixel tracking failed:', fbError);
     }
     
-    return NextResponse.json({ success: true, lead }, { status: 201 });
+    return NextResponse.json({ success: true, lead: savedLead }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Validation failed', details: error.issues }, { status: 400 });
