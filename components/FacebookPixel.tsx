@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import Script from 'next/script';
 
 declare global {
@@ -17,14 +17,13 @@ interface FacebookPixelProps {
 
 export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (!pixelId || !window.fbq) return;
 
     // Track page view on route change
     window.fbq('track', 'PageView');
-  }, [pathname, searchParams, pixelId]);
+  }, [pathname, pixelId]);
 
   if (!pixelId) return null;
 
