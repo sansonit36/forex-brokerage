@@ -129,7 +129,7 @@ const Solution = () => {
               className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-10 py-5 rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl transition-all duration-200 inline-flex items-center space-x-3"
             >
               <Phone size={24} />
-              <span>Book a Free Call — Let&apos;s Build Your Brokerage</span>
+              <span>Get Free Consultation — Let&apos;s Build Your Brokerage</span>
             </motion.button>
           </a>
 

@@ -139,20 +139,7 @@ const FAQ = () => {
                   whileTap={{ scale: 0.95 }}
                   className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
                 >
-                  Schedule a Call
-                </motion.button>
-              </a>
-              <a
-                href="https://wa.me/923184451469"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="bg-green-500 text-white px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
-                >
-                  Chat on WhatsApp
+                  Get Free Consultation
                 </motion.button>
               </a>
             </div>

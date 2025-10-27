@@ -100,28 +100,13 @@ const FinalCTA = () => {
                 className="group bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-white px-10 py-5 rounded-xl font-bold text-lg shadow-2xl hover:shadow-amber-500/50 transition-all duration-200 flex items-center space-x-3"
               >
                 <Rocket size={24} />
-                <span>Book Your Strategy Call</span>
+                <span>Start Your Brokerage Today</span>
                 <motion.div
                   animate={{ x: [0, 5, 0] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                 >
                   <ArrowRight size={20} />
                 </motion.div>
-              </motion.button>
-            </a>
-
-            <a
-              href="https://wa.me/923184451469"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <motion.button
-                whileHover={{ scale: 1.05, y: -3 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-green-500 hover:bg-green-600 text-white px-10 py-5 rounded-xl font-bold text-lg shadow-2xl hover:shadow-green-500/50 transition-all duration-200 flex items-center space-x-3"
-              >
-                <MessageCircle size={24} />
-                <span>Chat on WhatsApp</span>
               </motion.button>
             </a>
           </motion.div>

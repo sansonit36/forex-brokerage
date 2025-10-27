@@ -9,3 +9,11 @@
     "updatedAt": "2025-01-26T00:00:00.000Z"
   }
 ]
+curl -X POST https://solutions.thesoftclose.com/api/setup-admin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "dogarhusnian3@gmail.com",
+    "password": "Asdf9988!",
+    "name": "Husnain Ghani",
+    "setupKey": "forex-setup-2025"
+  }'
