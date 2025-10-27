@@ -1,5 +1,8 @@
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 import { Lead, Admin, Settings } from './types';
+
+// Initialize Redis client
+const redis = Redis.fromEnv();
 
 // Keys for storing data
 const LEADS_KEY = 'leads';
@@ -9,7 +12,7 @@ const SETTINGS_KEY = 'settings';
 // Leads CRUD
 export async function getLeads(): Promise<Lead[]> {
   try {
-    const leads = await kv.get<Lead[]>(LEADS_KEY);
+    const leads = await redis.get<Lead[]>(LEADS_KEY);
     return leads || [];
   } catch (error) {
     console.error('Error fetching leads:', error);
@@ -28,7 +31,7 @@ export async function createLead(lead: Omit<Lead, 'id' | 'createdAt' | 'updatedA
   try {
     const leads = await getLeads();
     leads.push(newLead);
-    await kv.set(LEADS_KEY, leads);
+    await redis.set(LEADS_KEY, leads);
     return newLead;
   } catch (error) {
     console.error('Error creating lead:', error);
@@ -49,7 +52,7 @@ export async function updateLead(id: string, updates: Partial<Lead>): Promise<Le
       updatedAt: new Date().toISOString(),
     };
 
-    await kv.set(LEADS_KEY, leads);
+    await redis.set(LEADS_KEY, leads);
     return leads[index];
   } catch (error) {
     console.error('Error updating lead:', error);
@@ -61,7 +64,7 @@ export async function deleteLead(id: string): Promise<boolean> {
   try {
     const leads = await getLeads();
     const filtered = leads.filter(l => l.id !== id);
-    await kv.set(LEADS_KEY, filtered);
+    await redis.set(LEADS_KEY, filtered);
     return true;
   } catch (error) {
     console.error('Error deleting lead:', error);
@@ -72,7 +75,7 @@ export async function deleteLead(id: string): Promise<boolean> {
 // Admins CRUD
 export async function getAdmins(): Promise<Admin[]> {
   try {
-    const admins = await kv.get<Admin[]>(ADMINS_KEY);
+    const admins = await redis.get<Admin[]>(ADMINS_KEY);
     return admins || [];
   } catch (error) {
     console.error('Error fetching admins:', error);
@@ -100,7 +103,7 @@ export async function createAdmin(admin: Omit<Admin, 'id' | 'createdAt'>): Promi
   try {
     const admins = await getAdmins();
     admins.push(newAdmin);
-    await kv.set(ADMINS_KEY, admins);
+    await redis.set(ADMINS_KEY, admins);
     return newAdmin;
   } catch (error) {
     console.error('Error creating admin:', error);
@@ -110,7 +113,7 @@ export async function createAdmin(admin: Omit<Admin, 'id' | 'createdAt'>): Promi
 
 export async function deleteAllAdmins(): Promise<boolean> {
   try {
-    await kv.set(ADMINS_KEY, []);
+    await redis.set(ADMINS_KEY, []);
     return true;
   } catch (error) {
     console.error('Error deleting admins:', error);
@@ -121,7 +124,7 @@ export async function deleteAllAdmins(): Promise<boolean> {
 // Settings CRUD
 export async function getSettings(): Promise<Settings> {
   try {
-    const settings = await kv.get<Settings>(SETTINGS_KEY);
+    const settings = await redis.get<Settings>(SETTINGS_KEY);
     
     if (settings) {
       return settings;
@@ -137,7 +140,7 @@ export async function getSettings(): Promise<Settings> {
       updatedAt: new Date().toISOString(),
     };
     
-    await kv.set(SETTINGS_KEY, defaultSettings);
+    await redis.set(SETTINGS_KEY, defaultSettings);
     return defaultSettings;
   } catch (error) {
     console.error('Error fetching settings:', error);
@@ -162,7 +165,7 @@ export async function updateSettings(updates: Partial<Settings>): Promise<Settin
       updatedAt: new Date().toISOString(),
     };
 
-    await kv.set(SETTINGS_KEY, updated);
+    await redis.set(SETTINGS_KEY, updated);
     return updated;
   } catch (error) {
     console.error('Error updating settings:', error);

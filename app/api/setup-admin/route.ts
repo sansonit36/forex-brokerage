@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 import bcrypt from 'bcryptjs';
+
+const redis = Redis.fromEnv();
 
 export async function POST(request: Request) {
   try {
@@ -13,7 +15,7 @@ export async function POST(request: Request) {
     }
 
     // Check if admin exists
-    const admins = await kv.get('admins') || [];
+    const admins = await redis.get('admins') || [];
     const existing = Array.isArray(admins) ? admins.find((a: any) => a.email === email) : null;
 
     if (existing) {
@@ -33,7 +35,7 @@ export async function POST(request: Request) {
 
     // Save to KV
     const updatedAdmins = Array.isArray(admins) ? [...admins, newAdmin] : [newAdmin];
-    await kv.set('admins', updatedAdmins);
+    await redis.set('admins', updatedAdmins);
 
     return NextResponse.json({
       success: true,
