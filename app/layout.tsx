@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import FacebookPixel from "@/components/FacebookPixel";
-import { getSettings } from "@/lib/db";
+import { getSettings } from "@/lib/supabase-db";
 import "./globals.css";
 
 const inter = Inter({
@@ -53,16 +53,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   // Get Facebook Pixel ID from settings
-  let pixelId = '';
+  let pixelId = '2017162985698789'; // Default hardcoded value
   try {
-    const settings = getSettings();
-    pixelId = settings.facebookPixelId || '';
+    const settings = await getSettings();
+    pixelId = settings.facebookPixelId || '2017162985698789';
   } catch (error) {
     console.error('Failed to load settings for Facebook Pixel:', error);
   }
@@ -75,7 +75,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${poppins.variable} antialiased`}
       >
-        {pixelId && <FacebookPixel pixelId={pixelId} />}
+        <FacebookPixel pixelId={pixelId} />
         {children}
       </body>
     </html>
