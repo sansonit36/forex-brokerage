@@ -50,7 +50,7 @@ export async function POST(request: Request) {
       try {
         existing = await getAdminByEmail(email);
       } catch (error) {
-        // Error checking existing admin
+        console.error('Error checking existing admin:', error);
         existing = null;
       }
       
@@ -61,29 +61,37 @@ export async function POST(request: Request) {
       const hashedPassword = await bcrypt.hash(password, 10);
       
       // Create admin
-      const admin = await createAdmin({
-        email,
-        password: hashedPassword,
-        name: body.name || 'Admin',
-        role: 'admin',
-      });
+      try {
+        const admin = await createAdmin({
+          email,
+          password: hashedPassword,
+          name: body.name || 'Admin',
+          role: 'admin',
+        });
 
-      const token = jwt.sign(
-        { id: admin.id, email: admin.email, role: admin.role },
-        JWT_SECRET,
-        { expiresIn: '7d' }
-      );
+        const token = jwt.sign(
+          { id: admin.id, email: admin.email, role: admin.role },
+          JWT_SECRET,
+          { expiresIn: '7d' }
+        );
 
-      return NextResponse.json({
-        success: true,
-        token,
-        admin: {
-          id: admin.id,
-          email: admin.email,
-          name: admin.name,
-          role: admin.role,
-        },
-      });
+        return NextResponse.json({
+          success: true,
+          token,
+          admin: {
+            id: admin.id,
+            email: admin.email,
+            name: admin.name,
+            role: admin.role,
+          },
+        });
+      } catch (createError) {
+        console.error('Error creating admin:', createError);
+        return NextResponse.json({ 
+          error: 'Failed to create admin account',
+          details: createError instanceof Error ? createError.message : 'Unknown error'
+        }, { status: 500 });
+      }
     }
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
