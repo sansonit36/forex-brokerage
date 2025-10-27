@@ -5,6 +5,12 @@ import { motion } from 'framer-motion';
 import { CheckCircle, Calendar, MessageCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
+declare global {
+  interface Window {
+    fbq: (command: string, eventName: string, data?: any) => void;
+  }
+}
+
 export default function ThankYouPage() {
   const [settings, setSettings] = useState({
     calendlyLink: 'https://calendly.com/your-link',
@@ -15,6 +21,12 @@ export default function ThankYouPage() {
 
   useEffect(() => {
     fetchSettings();
+    
+    // Trigger Facebook Pixel Lead event
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('track', 'Lead');
+      console.log('Facebook Pixel Lead event triggered');
+    }
   }, []);
 
   const fetchSettings = async () => {
