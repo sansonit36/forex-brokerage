@@ -74,22 +74,19 @@ export async function POST(request: Request) {
       const userAgent = headers.get('user-agent') || 'Unknown';
       const referer = headers.get('referer') || headers.get('origin') || 'Unknown';
 
-      // Try to get settings (might fail on Vercel)
-      let facebookPixelId = '';
-      let facebookAccessToken = '';
-      
-      try {
-        const settings = await getSettings();
-        facebookPixelId = settings.facebookPixelId;
-        facebookAccessToken = settings.facebookAccessToken;
-      } catch (settingsError) {
-        console.log('Could not load settings (expected on Vercel)');
-      }
+      // Get settings from Supabase
+      const settings = await getSettings();
+      console.log('Facebook Pixel Settings:', {
+        pixelId: settings.facebookPixelId,
+        hasAccessToken: !!settings.facebookAccessToken,
+        tokenLength: settings.facebookAccessToken?.length || 0
+      });
 
-      if (facebookPixelId && facebookAccessToken) {
-        await trackLeadSubmission(
-          facebookPixelId,
-          facebookAccessToken,
+      if (settings.facebookPixelId && settings.facebookAccessToken) {
+        console.log('Sending Facebook Pixel event...');
+        const pixelResult = await trackLeadSubmission(
+          settings.facebookPixelId,
+          settings.facebookAccessToken,
           {
             email: validatedData.email,
             phone: validatedData.phone,
@@ -104,6 +101,9 @@ export async function POST(request: Request) {
           referer,
           userAgent
         );
+        console.log('Facebook Pixel result:', pixelResult);
+      } else {
+        console.log('Facebook Pixel not configured - skipping');
       }
     } catch (fbError) {
       // Log error but don't fail the lead creation

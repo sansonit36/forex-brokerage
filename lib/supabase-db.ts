@@ -189,14 +189,14 @@ export async function getSettings(): Promise<Settings> {
     
     if (error) {
       if (error.code === 'PGRST116') {
-        // Create default settings
+        // Create default settings with Facebook credentials
         const defaultSettings: Settings = {
           id: 'default',
           calendlyLink: '',
           whatsappNumber: '+923184451469',
           whatsappMessage: 'Hello! I just submitted a form on your website and would like to learn more about your brokerage solutions.',
-          facebookPixelId: '',
-          facebookAccessToken: '',
+          facebookPixelId: '2017162985698789',
+          facebookAccessToken: 'EAANfl9zblnMBPZBi501yWRVXNIxvkZAoZAAjuE9GyFZCnD7ycvTV28xYVgefS9pnPZBZA2zfJMps7d7j4t8xhZA25Xsxu6vXJywLL7yYXNJSDZBpRyuRdHcZApIWixyZAwMv9oLQ9MctPOCNylxSrB9JORxKKlqbhSPtFoBLy8HlZBfoP10M8Uc0ChqBm944UrTeLC2WgZDZD',
           updatedAt: new Date().toISOString(),
         };
         
@@ -205,14 +205,24 @@ export async function getSettings(): Promise<Settings> {
           calendly_link: '',
           whatsapp_number: '+923184451469',
           whatsapp_message: 'Hello! I just submitted a form on your website and would like to learn more about your brokerage solutions.',
-          facebook_pixel_id: '',
-          facebook_access_token: '',
+          facebook_pixel_id: '2017162985698789',
+          facebook_access_token: 'EAANfl9zblnMBPZBi501yWRVXNIxvkZAoZAAjuE9GyFZCnD7ycvTV28xYVgefS9pnPZBZA2zfJMps7d7j4t8xhZA25Xsxu6vXJywLL7yYXNJSDZBpRyuRdHcZApIWixyZAwMv9oLQ9MctPOCNylxSrB9JORxKKlqbhSPtFoBLy8HlZBfoP10M8Uc0ChqBm944UrTeLC2WgZDZD',
         }]);
         return defaultSettings;
       }
       throw error;
     }
-    return data;
+    
+    // Map snake_case to camelCase
+    return {
+      id: data.id,
+      calendlyLink: data.calendly_link || '',
+      whatsappNumber: data.whatsapp_number || '+923184451469',
+      whatsappMessage: data.whatsapp_message || 'Hello!',
+      facebookPixelId: data.facebook_pixel_id || '2017162985698789',
+      facebookAccessToken: data.facebook_access_token || 'EAANfl9zblnMBPZBi501yWRVXNIxvkZAoZAAjuE9GyFZCnD7ycvTV28xYVgefS9pnPZBZA2zfJMps7d7j4t8xhZA25Xsxu6vXJywLL7yYXNJSDZBpRyuRdHcZApIWixyZAwMv9oLQ9MctPOCNylxSrB9JORxKKlqbhSPtFoBLy8HlZBfoP10M8Uc0ChqBm944UrTeLC2WgZDZD',
+      updatedAt: data.updated_at || new Date().toISOString(),
+    };
   } catch (error) {
     console.error('Error fetching settings:', error);
     return {
@@ -220,8 +230,8 @@ export async function getSettings(): Promise<Settings> {
       calendlyLink: '',
       whatsappNumber: '+923184451469',
       whatsappMessage: 'Hello!',
-      facebookPixelId: '',
-      facebookAccessToken: '',
+      facebookPixelId: '2017162985698789',
+      facebookAccessToken: 'EAANfl9zblnMBPZBi501yWRVXNIxvkZAoZAAjuE9GyFZCnD7ycvTV28xYVgefS9pnPZBZA2zfJMps7d7j4t8xhZA25Xsxu6vXJywLL7yYXNJSDZBpRyuRdHcZApIWixyZAwMv9oLQ9MctPOCNylxSrB9JORxKKlqbhSPtFoBLy8HlZBfoP10M8Uc0ChqBm944UrTeLC2WgZDZD',
       updatedAt: new Date().toISOString(),
     };
   }
