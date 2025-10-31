@@ -87,14 +87,29 @@ const Hero = () => {
               transition={{ delay: 0.5 }}
               className="flex flex-col sm:flex-row gap-4"
             >
-              <a href="/contact" className="w-full sm:w-auto">
+              <a href="/contact">
                 <motion.button
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl transition-all duration-200 flex items-center justify-center space-x-2"
+                  className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl transition-all duration-200 flex items-center justify-center space-x-2"
                 >
                   <Rocket size={22} />
-                  <span>Get Started - Free Consultation</span>
+                  <span>Book a Free Strategy Call</span>
+                </motion.button>
+              </a>
+
+              <a
+                href="https://wa.me/923184451469"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <MessageCircle size={22} />
+                  <span>Chat on WhatsApp</span>
                 </motion.button>
               </a>
             </motion.div>
